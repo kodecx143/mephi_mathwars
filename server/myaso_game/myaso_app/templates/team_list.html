@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teams</title>
+</head>
+<body>
+    <h1>List of Teams</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Team ID</th>
+                <th>Team Title</th>
+                <th>Team Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for team in teams %}
+                <tr>
+                    <td>{{ team.team_id }}</td>
+                    <td>{{ team.team_title }}</td>
+                    <td>{{ team.team_score }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
