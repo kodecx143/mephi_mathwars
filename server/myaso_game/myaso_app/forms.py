@@ -1,5 +1,5 @@
 from django import forms
-from .models import Team, User, Coin
+from .models import Team, User, Coin,Task
 
 class TeamForm(forms.ModelForm):
     class Meta:
@@ -15,3 +15,8 @@ class CoinForm(forms.ModelForm):
     class Meta:
         model = Coin
         fields = ['coin_position', 'cost', 'is_available']
+
+class TaskForm(forms.ModelForm):
+    class Meta:
+        model = Task 
+        fields = ['text', 'turns', 'answer','task_id']

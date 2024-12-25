@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-fyfypwk6hsqs0lp-mw5vggxh7w4!ybw6#7*t#nt7u=2cd6d1yg
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -37,10 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
      'myaso_app.apps.MyasoAppConfig',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -49,7 +51,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
+#MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')
 ROOT_URLCONF = 'myaso_game.urls'
 
 TEMPLATES = [
@@ -129,3 +131,8 @@ CHANNEL_LAYERS = {
         'CONFIG': {},
     },
 }
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8080",  # Укажите адрес Vue-сервера
+    "http://127.0.0.1:8080",
+]

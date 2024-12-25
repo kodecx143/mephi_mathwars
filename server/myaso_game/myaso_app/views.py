@@ -1,5 +1,11 @@
 from django.shortcuts import render
 from .models import Team, User, Coin
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
+import json 
+import random
+
 
 def team_list(request):
     
@@ -16,8 +22,33 @@ def coin_list(request):
     coins = Coin.objects.all()
     return render(request, 'coin_list.html', {'coins': coins})
 
+def position_cost(request, position):
+    
+    coin=Coin.objects.filter(coin_position=position).first()
+    if coin:
+        return JsonResponse({"cost":coin.cost})
+    else:
+        return JsonResponse({"cost":0})
 
 
+@csrf_exempt
+def generate_coin(request,count):
+    
+    positions = sorted(random.sample(range(1, 37), count))
+    Coin.objects.all().delete()
+    for i in range(count):
+        Coin.objects.create(coin_position=positions[i],cost=2,is_available=True)
+    all_coins = Coin.objects.all()
+    return JsonResponse({"message": f"Создано {count} монет.{all_coins}"})
+
+def destruct_coin(request, position):
+    coin=Coin.objects.get(coin_position=position)
+    coin.is_available = False
+    coin.save()
+    return JsonResponse({"message": f"Уничтожена монета на позиции {position}"})
+
+
+ 
 
 
 
