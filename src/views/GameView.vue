@@ -8,12 +8,12 @@
         :key="i"
         @click="UserMove(i)" 
       >
-        <div v-if="CoinCheck(this.user.pos)>0">
-          <img :src="coinImage" alt="Монета" class="coin-image" />
-          <span class="coin-value">{{ CoinCheck(this.user.pos) }}</span>
+        <div v-if="CoinCheck(i)>0">
+          <img :src="require('@/assets/CoinImage.png')" alt="Монета" class="coin-image" />
+          <span class="coin-value">{{ СoinCheck(i) }}</span>
         </div>
-        <div v-else-if="this.user.pos === i">
-          <img :src="userImage" alt="Пользователь" class="user-image" />
+        <div v-else-if="user.pos === i">
+          <img :src="require('@/assets/UserImage.png')" alt="Пользователь" class="user-image" />
         </div>
       </div>
     </div>
@@ -42,6 +42,7 @@ export default {
         score: 0,
         pos: 1, // Начальная позиция пользователя
       },
+      coin: {},
       gameStarted: false, // Флаг для отслеживания начала игры
     };
   },
@@ -49,8 +50,8 @@ export default {
     async CoinConstructor(value) {
       try {
         // Отправляем запрос на сервер для генерации монет
-        await axios.post('/api/generate-coins', { count: value });
-        console.log('Монеты сгенерированы на сервере');
+        await axios.post('/api/generate-coin', { count: value });
+        const response = await axios.get('/api/constructed-coin')
       } catch (error) {
         console.error('Ошибка при генерации монет:', error);
       }
@@ -58,25 +59,25 @@ export default {
     },
     async CoinCheck(pos) {
       try {
-        // Отправляем запрос на сервер для проверки наличия монеты
+        // Отправляем запрос на сервер для проверки наличия монеты с 
         const response = await axios.get(`/api/check-coin/${pos}`);
-        return response.data.score || 0; // Возвращаем стоимость монеты, если она есть
+        return response.cost || 0; // Возвращаем стоимость монеты, если она есть
       } catch (error) {
         console.error('Ошибка при проверке монеты:', error);
-        return 0; // Если произошла ошибка, возвращаем 0
+        return 0; 
       }
     },
     async UserMove(new_pos) {
-      this.user.pos = new_pos; // Обновляем позицию пользователя
+      this.user.pos = new_pos; 
       try {
-        const coinScore = await this.CoinCheck(this.user.pos); // Проверяем наличие монеты на новой позиции
+        const coinScore = await this.CoinCheck(this.user.pos);
       } catch (error) {
         console.error('Ошибка при подборе монеты:', error);
       }
       if (this.CoinCheck(this.user.pos) > 0) {
-        this.user.score += coinScore; // Увеличиваем счет пользователя
+        this.user.score += coinScore;
         alert(`Вы подобрали монету с ценностью: ${coinScore}`);
-        await this.CoinDestructor(this.user.pos); // Удаляем монету
+        await this.CoinDestructor(this.user.pos); 
       } else {
         alert('Монетки в этой ячейке нет.');
       }
@@ -105,11 +106,29 @@ export default {
 
 
 <style scoped>
-  .coin-image {
-  width: 50px; /* Ширина картинки монетки */
-  height: 50px; /* Высота картинки монетки */
+.container {
+  max-width: 800px; /* Ограничиваем максимальную ширину контейнера */
 }
 
+.row {
+  display: flex; /* Используем flexbox для выравнивания ячеек */
+  flex-wrap: wrap; /* Позволяем ячейкам переноситься на следующую строку */
+}
+
+.col-2 {
+  width: 16.66% !important; /* Устанавливаем ширину колонки, чтобы 6 колонок помещались в строку */
+  height: 70px !important; /* Высота ячейки */
+  display: flex !important; /* Используем flexbox для центрирования содержимого */
+  justify-content: center !important; /* Центрируем по горизонтали */
+  align-items: center !important; /* Центрируем по вертикали */
+  border: 1px solid #ccc !important; /* Добавляем границу для ячейки */
+}
+
+.coin-image,
+.user-image {
+  width: 50px; /* Ширина картинки монетки и пользователя */
+  height: 50px; /* Высота картинки монетки и пользователя */
+}
 
 .coin-value {
   position: absolute; /* Абсолютное позиционирование для стоимости */
@@ -118,10 +137,4 @@ export default {
   font-weight: bold;
   color: #fff; /* Цвет текста */
 }
-
-.user-image {
-  width: 50px; /* Ширина картинки пользователя */
-  height: 50px; /* Высота картинки пользователя */
-}
-/* Дополнительные стили, если нужно */
 </style>
