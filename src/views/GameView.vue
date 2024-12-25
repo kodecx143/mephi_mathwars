@@ -30,7 +30,28 @@
         </button>
       </div>
     </div>
-    <div class="round-container"></div>
+    <div class="round-container">
+      <form @submit.prevent="submitAnswer">
+        <div>
+          <label for="taskText">Задача:</label>
+          <input type="text" id="taskText" v-model="task.text" readonly />
+        </div>
+        <div>
+          <label for="taskTurns">Стоимость задачи:</label>
+          <input type="number" id="taskCost" v-model="task.turns" readonly />
+        </div>
+        <div>
+          <label :for="'userAnswer' + task.task_id">Ваш ответ:</label>
+          <input 
+            :id="'userAnswer' + task.task_id" 
+            v-model="user.answer" 
+            type="number" 
+          />
+        </div>
+        <button type="submit" :disabled="isAnswerSubmitted">Отослать</button>
+        <button type="button" @click="NewIssue">Новая задача</button>
+      </form>
+    </div>
   </div>
 </template>
 
@@ -44,10 +65,20 @@ export default {
       user: {
         user_id: 0,
         score: 0,
-        pos: 1, // Начальная позиция пользователя
+        turns: 0,
+        pos: 1,
+        answer: NaN
       },
       coins: Array(37).fill(0), // Массив для хранения наличия монет (индексы от 1 до 36)
       gameStarted: false, // Флаг для отслеживания начала игры
+      task: {
+        text: '',
+        turns: 0,
+        answer: 0,
+        task_id: 0,
+      },
+      isAnswerSubmitted: false,
+      message:NaN
     };
   },
   methods: {
@@ -82,6 +113,28 @@ export default {
       } catch (error) {
         console.error('Ошибка при подборе монеты:', error);
       }
+    },
+    async NewIssue() {
+      try {
+        const response = await axios.get('/api/new-task'); // Получаем новую задачу
+        this.task = response.data; // Сохраняем задачу
+        this.user.answer = null; // Сбрасываем ответ пользователя
+        this.isAnswerSubmitted = false; // Разрешаем отправку ответа
+        this.message = ''; // Сбрасываем сообщение
+      } catch (error) {
+        console.error('Ошибка при получении новой задачи:', error);
+      }
+    },
+    async submitAnswer()
+    {
+      if (this.user.answer === this.task.answer) {
+        this.user.turns += this.task.turns; // Увеличиваем счетчик ходов
+        this.message = 'Ответ верный!';
+      } else {
+        this.message = 'Ответ неверный, возьмите другую задачу.';
+      }
+      console.log(this.message)
+      this.isAnswerSubmitted = true; // Блокируем кнопку отправки
     },
     async CoinDestructor(pos) {
       try {
