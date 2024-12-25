@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Team, User, Coin
+from .models import Team, User, Coin,Task
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
@@ -22,6 +22,13 @@ def coin_list(request):
     coins = Coin.objects.all()
     return render(request, 'coin_list.html', {'coins': coins})
 
+def task_list(request):
+    Task.objects.all().delete()
+    Task.objects.create(text="2+2?",turns=2,answer="4",task_id="1")
+    Task.objects.create(text="Можно ли число 2024 представить в виде  a^5 +b^3, где а и b натуральные?",turns=2,answer="Да",task_id="2")
+    tasks =Task.objects.all()
+    return render(request, 'task_list.html', {'tasks': tasks})
+
 def position_cost(request, position):
     
     coin=Coin.objects.filter(coin_position=position).first()
@@ -42,11 +49,20 @@ def generate_coin(request,count):
     return JsonResponse({"message": f"Создано {count} монет.{all_coins}"})
 
 def destruct_coin(request, position):
-    coin=Coin.objects.get(coin_position=position)
-    coin.is_available = False
-    coin.save()
+    coin = Coin.objects.get(coin_position=position)
+    coin.delete()
+   # coin=Coin.objects.get(coin_position=position)
+   # coin.is_available = False
+   # coin.save()
     return JsonResponse({"message": f"Уничтожена монета на позиции {position}"})
 
+def answer_check(request, id,answer):
+    task=Task.objects.filter(task_id=id).first()
+    if (task.answer==answer):
+        return JsonResponse({"turns": task.turns })
+    else:
+        return JsonResponse({"turns":0})
+    
 
  
 

@@ -1,7 +1,7 @@
 <template>
   <div class="main-container d-flex flex-column">
     <div class="game-container flex-grow-1">
-        <div class="container mt-5">
+      <div class="container mt-5">
         <h1 class="text-center">Игровое поле 6x6</h1>
         <div class="row">
           <div 
@@ -10,7 +10,7 @@
             :key="i"
             @click="UserMove(i)" 
           >
-            <div v-if="CoinCheck(i)>0">
+            <div v-if=" coins[i] > 0">
               <img :src="require('@/assets/CoinImage.png')" alt="Монета" class="coin-image" />
             </div>
             <div v-else-if="user.pos === i">
@@ -30,9 +30,7 @@
         </button>
       </div>
     </div>
-    <div class="round-container">
-
-    </div>
+    <div class="round-container"></div>
   </div>
 </template>
 
@@ -48,7 +46,7 @@ export default {
         score: 0,
         pos: 1, // Начальная позиция пользователя
       },
-      coin: {},
+      coins: Array(37).fill(0), // Массив для хранения наличия монет (индексы от 1 до 36)
       gameStarted: false, // Флаг для отслеживания начала игры
     };
   },
@@ -56,18 +54,15 @@ export default {
     async CoinConstructor(value) {
       try {
         // Отправляем запрос на сервер для генерации монет
-        await axios.post(`/api/generate-coin/${value }/`);
-        
+        await axios.post(`/api/generate-coin/${value}/`);
       } catch (error) {
         console.error('Ошибка при генерации монет:', error);
       }
-      // Для каждой сгенерированной монеты отображать ее в клетке
     },
     async CoinCheck(pos) {
       try {
-        // Отправляем запрос на сервер для проверки наличия монеты с 
         const response = await axios.get(`/api/check-coin/${pos}`);
-        return response.cost || 0; // Возвращаем стоимость монеты, если она есть
+        return response.data.cost || 0; // Возвращаем стоимость монеты, если она есть
       } catch (error) {
         console.error('Ошибка при проверке монеты:', error); 
       }
@@ -77,34 +72,43 @@ export default {
       this.user.pos = new_pos; 
       try {
         const coinScore = await this.CoinCheck(this.user.pos);
+        if (coinScore > 0) {
+          this.user.score += coinScore;
+          alert("Вы подобрали монету с ценностью: ${coinScore}");
+           await this.CoinDestructor(this.user.pos); 
+        } else {
+          alert('Монетки в этой ячейке нет.');
+        }
       } catch (error) {
         console.error('Ошибка при подборе монеты:', error);
       }
-      const coinScore = await this.CoinCheck(this.user.pos);
-      if (this.CoinCheck(this.user.pos) > 0) {
-        this.user.score += coinScore;
-        alert(`Вы подобрали монету с ценностью: ${coinScore}`);
-//        await this.CoinDestructor(this.user.pos); 
-      } else {
-        alert('Монетки в этой ячейке нет.');
+    },
+    async CoinDestructor(pos) {
+      try {
+        this.coins[pos] =0
+        //await axios.post(`/api/delete-coin/${pos}`);
+        //console.log(`Монета в позиции ${pos} удалена на сервере`);
+      } catch (error) {
+        console.error('Ошибка при удалении монеты:', error);
       }
     },
-///    async CoinDestructor(pos) {
-//      try {
-//        await axios.delete(`/api/delete-coin/${pos}`);
-//        console.log(`Монета в позиции ${pos} удалена на сервере`);
-//      } catch (error) {
-//        console.error('Ошибка при удалении монеты:', error);
-//      }
-//    },
-//
     EventStartButtonClick() {
       this.CoinConstructor(12); // Генерируем 12 монет
+      this.checkCoins(); // Проверяем наличие монет после генерации
       this.gameStarted = true; // Устанавливаем флаг, что игра началась
+    },
+    async checkCoins() {
+      const promises = [];
+      for (let i = 1; i <= 36; i++) {
+        promises.push(this.CoinCheck(i).then(cost => {
+          this.coins[i] = cost; // Сохраняем стоимость монеты в массив
+        }));
+      }
+      await Promise.all(promises); // Ждем завершения всех асинхронных операций
     },
   },
   mounted() {
-
+    // Здесь можно добавить дополнительные действия при монтировании компонента
   },
 };
 </script>

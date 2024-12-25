@@ -31,4 +31,4 @@ class Task(models.Model):
     answer=models.CharField(max_length=100,default='')
     task_id = models.IntegerField(default=0)  
     def __str__(self):
-        return f"Answer {self.answer}"
+        return f"Text: {self.text}, Turns: {self.turns}, Answer: {self.answer}, Id: {self.task_id }"

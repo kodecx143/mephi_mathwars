@@ -131,7 +131,7 @@ CHANNEL_LAYERS = {
         'CONFIG': {},
     },
 }
-
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8080",  # Укажите адрес Vue-сервера
     "http://127.0.0.1:8080",
