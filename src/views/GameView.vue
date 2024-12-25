@@ -56,8 +56,8 @@ export default {
     async CoinConstructor(value) {
       try {
         // Отправляем запрос на сервер для генерации монет
-        await axios.post('/api/generate-coin', { count: value });
-        const response = await axios.get('/api/constructed-coin')
+        await axios.post(`/api/generate-coin/${value }/`);
+        
       } catch (error) {
         console.error('Ошибка при генерации монет:', error);
       }
@@ -80,6 +80,7 @@ export default {
       } catch (error) {
         console.error('Ошибка при подборе монеты:', error);
       }
+      const coinScore = await this.CoinCheck(this.user.pos);
       if (this.CoinCheck(this.user.pos) > 0) {
         this.user.score += coinScore;
         alert(`Вы подобрали монету с ценностью: ${coinScore}`);

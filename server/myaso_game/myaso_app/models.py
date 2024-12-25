@@ -18,9 +18,17 @@ class User(models.Model):
         return f"{self.user_name} (Captain: {self.is_captain})"
 
 class Coin(models.Model):
-    coin_position = models.CharField(max_length=100)
-    cost = models.IntegerField(default=0)  
+    coin_position = models.IntegerField(default=0)
+    cost = models.IntegerField(default=2)  
     is_available = models.BooleanField(default=True)  
 
     def __str__(self):
         return f"Coin at {self.coin_position}, Cost: {self.cost}, Available: {self.is_available}"
+
+class Task(models.Model):
+    text =models.CharField(max_length=1000,default='')
+    turns=models.IntegerField(default=2)
+    answer=models.CharField(max_length=100,default='')
+    task_id = models.IntegerField(default=0)  
+    def __str__(self):
+        return f"Answer {self.answer}"
