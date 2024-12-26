@@ -31,30 +31,23 @@
         </button>
       </div>
     </div>
-    <div class="round-container">
-      <form @submit.prevent="submitAnswer">
+    <div class="round-container d-flex flex-column justify-content-start">
+      <div class="task-info d-flex justify-content-between w-100">
         <div>
-          <label for="taskText">Задача:</label>
-          <input type="text" id="taskText" v-model="task.text" readonly />
+          <h4>Задача: {{ task.text }}</h4>
+          <h4>Стоимость: {{ task.cost }}</h4>
         </div>
-        <div>
-          <label for="taskTurns">Стоимость задачи:</label>
-          <input type="number" id="taskCost" v-model="task.turns" readonly />
-        </div>
-        <div>
-          <label :for="'userAnswer' + task.task_id">Ваш ответ:</label>
-          <input 
-            :id="'userAnswer' + task.task_id" 
-            v-model="user.answer" 
-            type="number" 
-          />
-        </div>
-        <div class="button-container d-flex flex-column w-100">
+        <div class="button-container d-flex flex-column">
           <button type="button" class="btn btn-secondary mb-1" @click="NewIssue">Новая задача</button>
           <button type="button" class="btn btn-success" @click="submitAnswer" :disabled="isAnswerSubmitted">Отослать</button>
         </div>
-      </form>
-    </div>
+      </div>
+      <div class="mt-3">
+        <h4>Ваш ответ:</h4>
+        <input type="text" v-model="user.answer" class="form-control" />
+      </div>
+      <div v-if="message">{{ message }}</div>
+    </div>  
   </div>
 </template>
 
@@ -146,8 +139,8 @@ export default {
       this.isAnswerSubmitted = true; // Блокируем кнопку отправки
     },
     PossibleTurn(new_pos){
-      x = this.user.pos;
-      t = this.user.turns;
+      let x = this.user.pos;
+      let t = this.user.turns;
       count = (x / 6 + x % 6 - new_pos / 6 - new_pos);
       if (Math.abs(count)<=t) {
         this.user.turns -= Math.abs(count);
@@ -194,14 +187,12 @@ export default {
   flex-wrap: wrap; /* Позволяем ячейкам переноситься на следующую строку */
 }
 .button-container {
-  flex-grow: 1;
   display: flex;
   flex-direction: column;
 }
 .btn {
   margin-top: 5px;
   margin-bottom: 5px;
-  flex: 1; /* Заставляет кнопки занимать все доступное пространство */
 }
   .col-2 {
   width: 16.66% !important; /* Устанавливаем ширину колонки, чтобы 6 колонок помещались в строку */
@@ -224,11 +215,12 @@ export default {
 .round-container {
   height: 30%; /* Задаем высоту для дополнительного интерфейса */
   background-color: #f8f9fa; /* Светлый фон для контраста */
-  border-top: 1px solid #ccc; /* Граница сверху для отделения */
+  border-top: 5px solid #ccc; /* Граница сверху для отделения */
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  padding: auto;
 }
 .coin-image,
 .user-image {
