@@ -18,8 +18,9 @@
             </div>
           </div>
         </div>
-        <div class="mt-3">
+        <div class="mt-3 d-flex justify-content-between">
           <h3>Счет пользователя: {{ user.score }}</h3>
+          <h3>Количество ходов: {{ user.turns }}</h3>
         </div>
         <button 
           class="btn btn-primary mt-3" 
@@ -48,8 +49,10 @@
             type="number" 
           />
         </div>
-        <button type="submit" :disabled="isAnswerSubmitted">Отослать</button>
-        <button type="button" @click="NewIssue">Новая задача</button>
+        <div class="button-container d-flex flex-column w-100">
+          <button type="button" class="btn btn-secondary mb-1" @click="NewIssue">Новая задача</button>
+          <button type="button" class="btn btn-success" @click="submitAnswer" :disabled="isAnswerSubmitted">Отослать</button>
+        </div>
       </form>
     </div>
   </div>
@@ -100,18 +103,24 @@ export default {
       return 0;
     },
     async UserMove(new_pos) {
-      this.user.pos = new_pos; 
-      try {
-        const coinScore = await this.CoinCheck(this.user.pos);
-        if (coinScore > 0) {
-          this.user.score += coinScore;
-          alert("Вы подобрали монету с ценностью: ${coinScore}");
-           await this.CoinDestructor(this.user.pos); 
-        } else {
-          alert('Монетки в этой ячейке нет.');
+      if (this.PossibleTurn(new_pos)) {
+        this.user.pos = new_pos;
+        try {
+          const coinScore = await this.CoinCheck(this.user.pos);
+          if (coinScore > 0) {
+            this.user.score += coinScore;
+            alert("Вы подобрали монету с ценностью: ${coinScore}");
+            await this.CoinDestructor(this.user.pos)
+            await this.CoinConstructor(1);
+          } else {
+            alert('Монетки в этой ячейке нет.');
+          }
+        } catch (error) {
+          console.error('Ошибка при подборе монеты:', error);
         }
-      } catch (error) {
-        console.error('Ошибка при подборе монеты:', error);
+      }
+      else {
+        console.log("Вы не можете попасть с данную клетку")
       }
     },
     async NewIssue() {
@@ -135,6 +144,16 @@ export default {
       }
       console.log(this.message)
       this.isAnswerSubmitted = true; // Блокируем кнопку отправки
+    },
+    PossibleTurn(new_pos){
+      x = this.user.pos;
+      t = this.user.turns;
+      count = (x / 6 + x % 6 - new_pos / 6 - new_pos);
+      if (Math.abs(count)<=t) {
+        this.user.turns -= Math.abs(count);
+        return true;
+      }
+      return false;
     },
     async CoinDestructor(pos) {
       try {
@@ -174,7 +193,17 @@ export default {
   display: flex; /* Используем flexbox для выравнивания ячеек */
   flex-wrap: wrap; /* Позволяем ячейкам переноситься на следующую строку */
 }
-.col-2 {
+.button-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+.btn {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  flex: 1; /* Заставляет кнопки занимать все доступное пространство */
+}
+  .col-2 {
   width: 16.66% !important; /* Устанавливаем ширину колонки, чтобы 6 колонок помещались в строку */
   height: 70px !important; /* Высота ячейки */
   display: flex !important; /* Используем flexbox для центрирования содержимого */
